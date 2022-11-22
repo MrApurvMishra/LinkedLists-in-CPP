@@ -1,13 +1,23 @@
+/*	Implementation of Linked Lists in C++,
+*	Along with multiple functions/manipulations
+*	(based on 'Cracking the Coding Interview' by Gayle Laakmann McDowell)
+*
+*	Author: Apurv Mishra (mr.mishra1408@gmail.com)	*/
+
+// include necessary header files
 #include <iostream>
 #include <unordered_set>
 #include <memory>
+
+// define initialization macro for smart pointers
+#define SHARED_PTR std::shared_ptr<SinglyLinkedListNode>
 
 // Linked list node class
 class SinglyLinkedListNode
 {
 public:
 	int data;
-	std::shared_ptr<SinglyLinkedListNode> next;
+	SHARED_PTR next;
 
 	SinglyLinkedListNode(int new_data)
 	{
@@ -20,8 +30,8 @@ public:
 class SinglyLinkedList
 {
 public:
-	std::shared_ptr<SinglyLinkedListNode> head;
-	std::shared_ptr<SinglyLinkedListNode> tail;
+	SHARED_PTR head;
+	SHARED_PTR tail;
 
 	// initialize with head and tail nodes
 	SinglyLinkedList()
@@ -30,10 +40,10 @@ public:
 		tail = nullptr;
 	}
 
-	// append nodes
+	// append nodes from front
 	void insertNode(int new_data)
 	{
-		std::shared_ptr<SinglyLinkedListNode> node = std::make_shared<SinglyLinkedListNode>(new_data);
+		SHARED_PTR node = std::make_shared<SinglyLinkedListNode>(new_data);
 
 		if (!head)
 			head = node;
@@ -41,6 +51,19 @@ public:
 			tail->next = node;
 
 		tail = node;
+	}
+
+	// append nodes from back
+	void pushBackNode(int new_data)
+	{
+		SHARED_PTR node = std::make_shared<SinglyLinkedListNode>(new_data);
+
+		if (!tail)
+			tail = node;
+		else
+			node->next = head;
+
+		head = node;
 	}
 
 	// delete head node
@@ -51,7 +74,7 @@ public:
 
 	void deleteTail()
 	{
-		std::shared_ptr<SinglyLinkedListNode> curr = head;
+		SHARED_PTR curr = head;
 		while (curr->next->next)
 			curr = curr->next;
 		curr->next = nullptr;
@@ -61,13 +84,13 @@ public:
 	// delete middle node
 	void deleteNode(SinglyLinkedListNode* node)
 	{
-		std::shared_ptr<SinglyLinkedListNode> nextNode = node->next;
+		SHARED_PTR nextNode = node->next;
 		node->data = nextNode->data;
 		node->next = nextNode->next;
 	}
 
 	// print the complete list
-	void printNodes(std::shared_ptr<SinglyLinkedListNode> curr)
+	void printNodes(SHARED_PTR curr)
 	{
 		while (curr)
 		{
@@ -84,8 +107,8 @@ public:
 		std::unordered_set<int> list_elements;
 
 		// remove duplicates and keep unique elements
-		std::shared_ptr<SinglyLinkedListNode> curr = this->head;
-		std::shared_ptr<SinglyLinkedListNode> prev = nullptr;
+		SHARED_PTR curr = this->head;
+		SHARED_PTR prev = nullptr;
 		while (curr)
 		{
 			if (list_elements.find(curr->data) == list_elements.end())
@@ -108,7 +131,7 @@ public:
 	void printKthToLast(int k)
 	{
 		// set current node to head
-		std::shared_ptr<SinglyLinkedListNode> curr = this->head;
+		SHARED_PTR curr = this->head;
 
 		// iterate and print
 		std::cout << "From kth to last elements: ";
@@ -125,7 +148,7 @@ public:
 	void printTillKth(int k)
 	{
 		// set current node to head
-		std::shared_ptr<SinglyLinkedListNode> curr = this->head;
+		SHARED_PTR curr = this->head;
 
 		// iterate and print
 		std::cout << "First k elements: ";
@@ -140,14 +163,14 @@ public:
 	}
 
 	// find kth element from the last
-	std::shared_ptr<SinglyLinkedListNode> findKthFromLast(int k)
+	SHARED_PTR findKthFromLast(int k)
 	{
 		// initialize to count till k
 		int count = 0;
 
 		// pointers to find kth element
-		std::shared_ptr<SinglyLinkedListNode> ptr1 = this->head;
-		std::shared_ptr<SinglyLinkedListNode> ptr2 = this->head;
+		SHARED_PTR ptr1 = this->head;
+		SHARED_PTR ptr2 = this->head;
 
 		// find kth element from start
 		while (ptr1 && count < k)
@@ -169,14 +192,15 @@ public:
 
 	// partition into two lists, given a partition point
 	// elements smaller and greater than the given value separtated
-	void partitionList(std::shared_ptr<SinglyLinkedList> lesser, std::shared_ptr<SinglyLinkedList> greater, int pivot)
+	void partitionList(std::shared_ptr<SinglyLinkedList> lesser,
+					   std::shared_ptr<SinglyLinkedList> greater, int pivot)
 	{
 		// make sure that the head nodes of new lists are null
 		lesser->head = nullptr;
 		greater->head = nullptr;
 
 		// define a current node to traverse the list
-		std::shared_ptr<SinglyLinkedListNode> curr = this->head;
+		SHARED_PTR curr = this->head;
 
 		// traverse the list while partitioning as needed
 		while (curr)
@@ -198,6 +222,57 @@ public:
 		std::cout << "Partitioned lists:" << std::endl;
 		lesser->printNodes(lesser->head);
 		greater->printNodes(greater->head);
+	}
+
+	// reverse a linked list
+	SHARED_PTR reverseListHead()
+	{
+		// head for the reversed list
+		std::unique_ptr<SinglyLinkedList> reversedList = std::make_unique<SinglyLinkedList>();
+
+		// current node to iterate through the original list
+		SHARED_PTR curr = this->head;
+
+		// iterate, reverse and clone
+		while (curr)
+		{
+			reversedList->pushBackNode(curr->data);
+			curr = curr->next;
+		}
+
+		// return head
+		return reversedList->head;
+	}
+
+	// check if two lists are equal
+	bool isEqual(SHARED_PTR reversedHead)
+	{
+		// make the two head variables
+		SHARED_PTR head1 = this->head, head2 = reversedHead;
+		
+		// compare each node
+		while (head1 && head2)
+		{
+			if (head1->data == head2->data)
+			{
+				head1 = head1->next;
+				head2 = head2->next;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		// return true, otherwise
+		return true;
+	}
+
+	// check if palindrome, using stack
+	bool isPalindrome() 
+	{
+		// reverse the list and check if equal
+		return this->isEqual(this->reverseListHead());
 	}
 };
 
@@ -231,6 +306,16 @@ int main()
 	std::cout << "Given lists: " << std::endl;
 	list1->printNodes(list1->head);
 	list2->printNodes(list2->head);
+
+	// reverse and print lists
+	std::cout << std::endl << "Reversed lists:" << std::endl;
+	list1->printNodes(list1->reverseListHead());
+	list2->printNodes(list2->reverseListHead());
+
+	// check if the list is palindrome
+	std::cout << std::endl << "Check if given lists were palindrome..." << std::endl;
+	std::cout << "List 1 - " << (list1->isPalindrome() ? "true" : "false") << std::endl;
+	std::cout << "List 2 - " << (list2->isPalindrome() ? "true" : "false") << std::endl;
 
 	// remove duplicates and print
 	std::cout << std::endl << "After removing duplicates: " << std::endl;
@@ -284,4 +369,7 @@ int main()
 
 	// END
 	std::cout << std::endl << "----------- END OF CODE -----------" << std::endl;
+
+	// just in case, as the output might quickly disappear
+	std::cin.get();
 }
