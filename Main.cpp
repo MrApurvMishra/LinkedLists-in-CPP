@@ -1,16 +1,20 @@
-/*	Implementation of Linked Lists in C++,
+/*	Implementation of Singly Linked Lists in C++,
 *	Along with multiple functions/manipulations
 *	(based on 'Cracking the Coding Interview' by Gayle Laakmann McDowell)
 *
-*	Author: Apurv Mishra (mr.mishra1408@gmail.com)	*/
+*	Author: Apurv Mishra (mr.mishra1408@gmail.com)
+* 
+*	Constraints: All nodes contain integer values only.	*/
 
 // include necessary header files
 #include <iostream>
 #include <unordered_set>
 #include <memory>
 
+using namespace std;
+
 // define initialization macro for smart pointers
-#define SHARED_PTR std::shared_ptr<SinglyLinkedListNode>
+#define SHARED_PTR shared_ptr<SinglyLinkedListNode>
 
 // Linked list node class
 class SinglyLinkedListNode
@@ -43,7 +47,7 @@ public:
 	// append nodes from front
 	void insertNode(int new_data)
 	{
-		SHARED_PTR node = std::make_shared<SinglyLinkedListNode>(new_data);
+		SHARED_PTR node = make_shared<SinglyLinkedListNode>(new_data);
 
 		if (!head)
 			head = node;
@@ -56,7 +60,7 @@ public:
 	// append nodes from back
 	void pushBackNode(int new_data)
 	{
-		SHARED_PTR node = std::make_shared<SinglyLinkedListNode>(new_data);
+		SHARED_PTR node = make_shared<SinglyLinkedListNode>(new_data);
 
 		if (!tail)
 			tail = node;
@@ -72,6 +76,7 @@ public:
 		head = head->next;
 	}
 
+	// delete tail node
 	void deleteTail()
 	{
 		SHARED_PTR curr = head;
@@ -94,17 +99,17 @@ public:
 	{
 		while (curr)
 		{
-			std::cout << curr->data << " ";
+			cout << curr->data << " ";
 			curr = curr->next;
 		}
-		std::cout << std::endl;
+		cout << endl;
 	}
 
 	// remove duplicate elements
 	void removeDups()
 	{
 		// hashmap to contain set of unique elements
-		std::unordered_set<int> list_elements;
+		unordered_set<int> list_elements;
 
 		// remove duplicates and keep unique elements
 		SHARED_PTR curr = this->head;
@@ -117,9 +122,8 @@ public:
 				prev = curr;
 			}
 			else
-			{
 				prev->next = curr->next;
-			}
+
 			curr = curr->next;
 		}
 
@@ -134,7 +138,7 @@ public:
 		SHARED_PTR curr = this->head;
 
 		// iterate and print
-		std::cout << "From kth to last elements: ";
+		cout << "From kth to last elements: ";
 		int i = 1;
 		while (curr && i < k)
 		{
@@ -151,15 +155,15 @@ public:
 		SHARED_PTR curr = this->head;
 
 		// iterate and print
-		std::cout << "First k elements: ";
+		cout << "First k elements: ";
 		int i = 1;
 		while (curr && i <= k)
 		{
 			i++;
-			std::cout << curr->data << " ";
+			cout << curr->data << " ";
 			curr = curr->next;
 		}
-		std::cout << std::endl;
+		cout << endl;
 	}
 
 	// find kth element from the last
@@ -192,8 +196,8 @@ public:
 
 	// partition into two lists, given a partition point
 	// elements smaller and greater than the given value separtated
-	void partitionList(std::shared_ptr<SinglyLinkedList> lesser,
-					   std::shared_ptr<SinglyLinkedList> greater, int pivot)
+	void partitionList(shared_ptr<SinglyLinkedList> lesser,
+					   shared_ptr<SinglyLinkedList> greater, int pivot)
 	{
 		// make sure that the head nodes of new lists are null
 		lesser->head = nullptr;
@@ -206,20 +210,16 @@ public:
 		while (curr)
 		{
 			if (curr->data < pivot)
-			{
 				lesser->insertNode(curr->data);
-			}
 			else
-			{
 				greater->insertNode(curr->data);
-			}
 
 			// move to the next node
 			curr = curr->next;
 		}
 
 		// print the partitioned lists
-		std::cout << "Partitioned lists:" << std::endl;
+		cout << "Partitioned lists:" << endl;
 		lesser->printNodes(lesser->head);
 		greater->printNodes(greater->head);
 	}
@@ -228,7 +228,7 @@ public:
 	SHARED_PTR reverseListHead()
 	{
 		// head for the reversed list
-		std::unique_ptr<SinglyLinkedList> reversedList = std::make_unique<SinglyLinkedList>();
+		unique_ptr<SinglyLinkedList> reversedList = make_unique<SinglyLinkedList>();
 
 		// current node to iterate through the original list
 		SHARED_PTR curr = this->head;
@@ -259,66 +259,106 @@ public:
 				head2 = head2->next;
 			}
 			else
-			{
 				return false;
-			}
 		}
 
 		// return true, otherwise
 		return true;
 	}
 
-	// check if palindrome, using stack
+	// check if palindrome, using linked list functions
 	bool isPalindrome() 
 	{
 		// reverse the list and check if equal
 		return this->isEqual(this->reverseListHead());
 	}
+
+	// check if palindrome, using stack
+	bool isPalindrome_usingStack()
+	{
+		// initialize stack to store elements in reverse order
+		vector<int> reversedList;
+
+		// pointer to the header node
+		SHARED_PTR slow = this->head, fast = this->head;
+
+		// store reversed list
+		while (fast && fast->next)
+		{
+			reversedList.push_back(slow->data);
+			slow = slow->next;
+			fast = fast->next->next;
+		}
+
+		// if odd number of nodes, then skip middle node
+		if (fast)
+			slow = slow->next;
+
+		// compare the two, element-wise
+		while (slow)
+		{
+			if (reversedList.back() == slow->data)
+			{
+				reversedList.pop_back();
+				slow = slow->next;
+			}
+			else
+				return false;
+		}
+
+		// return true, otherwise
+		return true;
+	}
 };
 
 // construct linked list from user inputs
-void inputList(std::shared_ptr<SinglyLinkedList> list)
+void inputList(shared_ptr<SinglyLinkedList> list)
 {
 	int n, data;
-	std::cout << "Enter the desired length of the integer list: ";
-	std::cin >> n;
-	std::cout << "Enter the elements:" << std::endl;
+	cout << "Enter the desired length of the integer list: ";
+	cin >> n;
+	cout << "Enter the elements:" << endl;
 	for (int i = 0; i < n; i++)
 	{
-		std::cin >> data;
+		cin >> data;
 		list->insertNode(data);
 	}
-	std::cout << std::endl;
+	cout << endl;
 }
 
 // entry point
 int main()
 {
 	// declare linked lists
-	std::shared_ptr<SinglyLinkedList> list1 = std::make_shared<SinglyLinkedList>();
-	std::shared_ptr<SinglyLinkedList> list2 = std::make_shared<SinglyLinkedList>();
+	shared_ptr<SinglyLinkedList> list1 = make_shared<SinglyLinkedList>();
+	shared_ptr<SinglyLinkedList> list2 = make_shared<SinglyLinkedList>();
 
 	// initiliaze linked lists
 	inputList(list1);
 	inputList(list2);
 
 	// print the lists
-	std::cout << "Given lists: " << std::endl;
+	cout << "Given lists: " << endl;
 	list1->printNodes(list1->head);
 	list2->printNodes(list2->head);
 
 	// reverse and print lists
-	std::cout << std::endl << "Reversed lists:" << std::endl;
+	cout << endl << "Reversed lists:" << endl;
 	list1->printNodes(list1->reverseListHead());
 	list2->printNodes(list2->reverseListHead());
 
 	// check if the list is palindrome
-	std::cout << std::endl << "Check if given lists were palindrome..." << std::endl;
-	std::cout << "List 1 - " << (list1->isPalindrome() ? "true" : "false") << std::endl;
-	std::cout << "List 2 - " << (list2->isPalindrome() ? "true" : "false") << std::endl;
+	cout << endl << "Check if given lists were palindrome..." << endl;
+	cout << "List 1 - " << (list1->isPalindrome() ? "true" : "false") << endl;
+	cout << "List 2 - " << (list2->isPalindrome() ? "true" : "false") << endl;
+
+	// check if the list is palindrome, using stack
+	cout << endl << "Check if given lists were palindrome... using stack" << endl;
+	cout << "List 1 - " << (list1->isPalindrome_usingStack() ? "true" : "false") << endl;
+	cout << "List 2 - " << (list2->isPalindrome_usingStack() ? "true" : "false") << endl;
 
 	// remove duplicates and print
-	std::cout << std::endl << "After removing duplicates: " << std::endl;
+	cout << endl << "After removing duplicates: " << endl;
 	list1->removeDups();
 	list2->removeDups();
 
@@ -329,47 +369,47 @@ int main()
 	list2->deleteTail();
 
 	// print the lists again
-	std::cout << std::endl << "Removed head from list 1 and tail from list 2: " << std::endl;
+	cout << endl << "Removed head from list 1 and tail from list 2: " << endl;
 	list1->printNodes(list1->head);
 	list2->printNodes(list2->head);
 
 	// print kth to last element
 	int k;
-	std::cout << std::endl << "Enter index k to print elements from: ";
-	std::cin >> k;
+	cout << endl << "Enter index k to print elements from: ";
+	cin >> k;
 	list1->printKthToLast(k);
 	list2->printKthToLast(k);
 
 	// print kth to last element
-	std::cout << std::endl << "Enter index k to print elements till: ";
-	std::cin >> k;
+	cout << endl << "Enter index k to print elements till: ";
+	cin >> k;
 	list1->printTillKth(k);
 	list2->printTillKth(k);
 
 	// find and print kth from last element
-	std::cout << std::endl << "Enter index k to print element from the end: ";
-	std::cin >> k;
-	std::cout << "Required element from list 1: " << list1->findKthFromLast(k)->data << std::endl;
-	std::cout << "Required element from list 2: " << list2->findKthFromLast(k)->data << std::endl;
+	cout << endl << "Enter index k to print element from the end: ";
+	cin >> k;
+	cout << "Required element from list 1: " << list1->findKthFromLast(k)->data << endl;
+	cout << "Required element from list 2: " << list2->findKthFromLast(k)->data << endl;
 
 	/*	partition the list into two lists, given a partition data
 		new lists contain lesser and greater data, respectively	*/
-	std::shared_ptr<SinglyLinkedList> lesser_nodes = std::make_shared<SinglyLinkedList>();
-	std::shared_ptr<SinglyLinkedList> greater_nodes = std::make_shared<SinglyLinkedList>();
+	shared_ptr<SinglyLinkedList> lesser_nodes = make_shared<SinglyLinkedList>();
+	shared_ptr<SinglyLinkedList> greater_nodes = make_shared<SinglyLinkedList>();
 
 	// list 1
-	std::cout << std::endl << "Enter the partition pivot data for list 1: ";
-	std::cin >> k;
+	cout << endl << "Enter the partition pivot data for list 1: ";
+	cin >> k;
 	list1->partitionList(lesser_nodes, greater_nodes, k);
 
 	// list 2
-	std::cout << std::endl << "Enter the partition pivot data for list 2: ";
-	std::cin >> k;
+	cout << endl << "Enter the partition pivot data for list 2: ";
+	cin >> k;
 	list2->partitionList(lesser_nodes, greater_nodes, k);
 
 	// END
-	std::cout << std::endl << "----------- END OF CODE -----------" << std::endl;
+	cout << endl << "----------- END OF CODE -----------" << endl;
 
 	// just in case, as the output might quickly disappear
-	std::cin.get();
+	cin.get();
 }
