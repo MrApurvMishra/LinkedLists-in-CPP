@@ -1,12 +1,13 @@
 #include <iostream>
 #include <unordered_set>
+#include <memory>
 
 // Linked list node class
 class SinglyLinkedListNode
 {
 public:
 	int data;
-	SinglyLinkedListNode *next;
+	std::shared_ptr<SinglyLinkedListNode> next;
 
 	SinglyLinkedListNode(int new_data)
 	{
@@ -15,15 +16,15 @@ public:
 	}
 };
 
-// Linked list class
-class SingleLinkedList
+// Linked list wrapper class
+class SinglyLinkedList
 {
 public:
-	SinglyLinkedListNode* head;
-	SinglyLinkedListNode* tail;
+	std::shared_ptr<SinglyLinkedListNode> head;
+	std::shared_ptr<SinglyLinkedListNode> tail;
 
 	// initialize with head and tail nodes
-	SingleLinkedList()
+	SinglyLinkedList()
 	{
 		head = nullptr;
 		tail = nullptr;
@@ -32,7 +33,7 @@ public:
 	// append nodes
 	void insertNode(int new_data)
 	{
-		SinglyLinkedListNode *node = new SinglyLinkedListNode(new_data);
+		std::shared_ptr<SinglyLinkedListNode> node = std::make_shared<SinglyLinkedListNode>(new_data);
 
 		if (!head)
 			head = node;
@@ -50,7 +51,7 @@ public:
 
 	void deleteTail()
 	{
-		SinglyLinkedListNode* curr = head;
+		std::shared_ptr<SinglyLinkedListNode> curr = head;
 		while (curr->next->next)
 			curr = curr->next;
 		curr->next = nullptr;
@@ -60,13 +61,13 @@ public:
 	// delete middle node
 	void deleteNode(SinglyLinkedListNode* node)
 	{
-		SinglyLinkedListNode* nextNode = node->next;
+		std::shared_ptr<SinglyLinkedListNode> nextNode = node->next;
 		node->data = nextNode->data;
 		node->next = nextNode->next;
 	}
 
 	// print the complete list
-	void printNodes(SinglyLinkedListNode* curr)
+	void printNodes(std::shared_ptr<SinglyLinkedListNode> curr)
 	{
 		while (curr)
 		{
@@ -83,8 +84,8 @@ public:
 		std::unordered_set<int> list_elements;
 
 		// remove duplicates and keep unique elements
-		SinglyLinkedListNode* curr = this->head;
-		SinglyLinkedListNode* prev = nullptr;
+		std::shared_ptr<SinglyLinkedListNode> curr = this->head;
+		std::shared_ptr<SinglyLinkedListNode> prev = nullptr;
 		while (curr)
 		{
 			if (list_elements.find(curr->data) == list_elements.end())
@@ -107,7 +108,7 @@ public:
 	void printKthToLast(int k)
 	{
 		// set current node to head
-		SinglyLinkedListNode* curr = this->head;
+		std::shared_ptr<SinglyLinkedListNode> curr = this->head;
 
 		// iterate and print
 		std::cout << "From kth to last elements: ";
@@ -124,7 +125,7 @@ public:
 	void printTillKth(int k)
 	{
 		// set current node to head
-		SinglyLinkedListNode* curr = this->head;
+		std::shared_ptr<SinglyLinkedListNode> curr = this->head;
 
 		// iterate and print
 		std::cout << "First k elements: ";
@@ -139,14 +140,14 @@ public:
 	}
 
 	// find kth element from the last
-	SinglyLinkedListNode* findKthFromLast(int k) 
+	std::shared_ptr<SinglyLinkedListNode> findKthFromLast(int k)
 	{
 		// initialize to count till k
 		int count = 0;
 
 		// pointers to find kth element
-		SinglyLinkedListNode* ptr1 = this->head;
-		SinglyLinkedListNode* ptr2 = this->head;
+		std::shared_ptr<SinglyLinkedListNode> ptr1 = this->head;
+		std::shared_ptr<SinglyLinkedListNode> ptr2 = this->head;
 
 		// find kth element from start
 		while (ptr1 && count < k)
@@ -165,10 +166,43 @@ public:
 		// return the kth from last element
 		return ptr2;
 	}
+
+	// partition into two lists, given a partition point
+	// elements smaller and greater than the given value separtated
+	void partitionList(std::shared_ptr<SinglyLinkedList> lesser, std::shared_ptr<SinglyLinkedList> greater, int pivot)
+	{
+		// make sure that the head nodes of new lists are null
+		lesser->head = nullptr;
+		greater->head = nullptr;
+
+		// define a current node to traverse the list
+		std::shared_ptr<SinglyLinkedListNode> curr = this->head;
+
+		// traverse the list while partitioning as needed
+		while (curr)
+		{
+			if (curr->data < pivot)
+			{
+				lesser->insertNode(curr->data);
+			}
+			else
+			{
+				greater->insertNode(curr->data);
+			}
+
+			// move to the next node
+			curr = curr->next;
+		}
+
+		// print the partitioned lists
+		std::cout << "Partitioned lists:" << std::endl;
+		lesser->printNodes(lesser->head);
+		greater->printNodes(greater->head);
+	}
 };
 
 // construct linked list from user inputs
-SingleLinkedList* inputList(SingleLinkedList* list)
+void inputList(std::shared_ptr<SinglyLinkedList> list)
 {
 	int n, data;
 	std::cout << "Enter the desired length of the integer list: ";
@@ -180,20 +214,18 @@ SingleLinkedList* inputList(SingleLinkedList* list)
 		list->insertNode(data);
 	}
 	std::cout << std::endl;
-
-	return list;
 }
 
 // entry point
 int main()
 {
 	// declare linked lists
-	SingleLinkedList* list1 = new SingleLinkedList();
-	SingleLinkedList* list2 = new SingleLinkedList();
+	std::shared_ptr<SinglyLinkedList> list1 = std::make_shared<SinglyLinkedList>();
+	std::shared_ptr<SinglyLinkedList> list2 = std::make_shared<SinglyLinkedList>();
 
 	// initiliaze linked lists
-	list1 = inputList(list1);
-	list2 = inputList(list2);
+	inputList(list1);
+	inputList(list2);
 
 	// print the lists
 	std::cout << "Given lists: " << std::endl;
@@ -234,4 +266,22 @@ int main()
 	std::cin >> k;
 	std::cout << "Required element from list 1: " << list1->findKthFromLast(k)->data << std::endl;
 	std::cout << "Required element from list 2: " << list2->findKthFromLast(k)->data << std::endl;
+
+	/*	partition the list into two lists, given a partition data
+		new lists contain lesser and greater data, respectively	*/
+	std::shared_ptr<SinglyLinkedList> lesser_nodes = std::make_shared<SinglyLinkedList>();
+	std::shared_ptr<SinglyLinkedList> greater_nodes = std::make_shared<SinglyLinkedList>();
+
+	// list 1
+	std::cout << std::endl << "Enter the partition pivot data for list 1: ";
+	std::cin >> k;
+	list1->partitionList(lesser_nodes, greater_nodes, k);
+
+	// list 2
+	std::cout << std::endl << "Enter the partition pivot data for list 2: ";
+	std::cin >> k;
+	list2->partitionList(lesser_nodes, greater_nodes, k);
+
+	// END
+	std::cout << std::endl << "----------- END OF CODE -----------" << std::endl;
 }
