@@ -402,6 +402,14 @@ int main()
 	cout << "List 1 - " << (list1->isPalindrome_usingStack() ? "true" : "false") << endl;
 	cout << "List 2 - " << (list2->isPalindrome_usingStack() ? "true" : "false") << endl;
 
+	// check for intersection of two lists
+	cout << endl << "Checking if the two lists intersect..." << endl;
+	SHARED_PTR intersectingNode = list1->intersectsAt(list2);
+	if (intersectingNode == NULL)
+		cout << "No intersection exists!" << endl;
+	else
+		cout << "Intersection at value = " << intersectingNode->data << ", at address " << intersectingNode;
+
 	// remove duplicates and print
 	cout << endl << "After removing duplicates: " << endl;
 	list1->removeDups();
