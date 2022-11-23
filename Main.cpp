@@ -10,6 +10,7 @@
 #include <iostream>
 #include <unordered_set>
 #include <memory>
+#include <cmath>
 
 using namespace std;
 
@@ -36,12 +37,14 @@ class SinglyLinkedList
 public:
 	SHARED_PTR head;
 	SHARED_PTR tail;
+	int total_length;
 
 	// initialize with head and tail nodes
 	SinglyLinkedList()
 	{
 		head = nullptr;
 		tail = nullptr;
+		total_length = 0;
 	}
 
 	// append nodes from front
@@ -55,6 +58,7 @@ public:
 			tail->next = node;
 
 		tail = node;
+		total_length++;
 	}
 
 	// append nodes from back
@@ -112,7 +116,7 @@ public:
 		unordered_set<int> list_elements;
 
 		// remove duplicates and keep unique elements
-		SHARED_PTR curr = this->head;
+		SHARED_PTR curr = head;
 		SHARED_PTR prev = nullptr;
 		while (curr)
 		{
@@ -128,14 +132,14 @@ public:
 		}
 
 		// print list elements
-		this->printNodes(this->head);
+		printNodes(head);
 	}
 
 	// print elements from kth to the last one
 	void printKthToLast(int k)
 	{
 		// set current node to head
-		SHARED_PTR curr = this->head;
+		SHARED_PTR curr = head;
 
 		// iterate and print
 		cout << "From kth to last elements: ";
@@ -145,14 +149,14 @@ public:
 			i++;
 			curr = curr->next;
 		}
-		this->printNodes(curr);
+		printNodes(curr);
 	}
 
 	// print elements from start till k
 	void printTillKth(int k)
 	{
 		// set current node to head
-		SHARED_PTR curr = this->head;
+		SHARED_PTR curr = head;
 
 		// iterate and print
 		cout << "First k elements: ";
@@ -173,8 +177,8 @@ public:
 		int count = 0;
 
 		// pointers to find kth element
-		SHARED_PTR ptr1 = this->head;
-		SHARED_PTR ptr2 = this->head;
+		SHARED_PTR ptr1 = head;
+		SHARED_PTR ptr2 = head;
 
 		// find kth element from start
 		while (ptr1 && count < k)
@@ -248,7 +252,7 @@ public:
 	bool isEqual(SHARED_PTR reversedHead)
 	{
 		// make the two head variables
-		SHARED_PTR head1 = this->head, head2 = reversedHead;
+		SHARED_PTR head1 = head, head2 = reversedHead;
 		
 		// compare each node
 		while (head1 && head2)
@@ -280,7 +284,7 @@ public:
 		vector<int> reversedList;
 
 		// pointer to the header node
-		SHARED_PTR slow = this->head, fast = this->head;
+		SHARED_PTR slow = head, fast = head;
 
 		// store reversed list
 		while (fast && fast->next)
@@ -308,6 +312,47 @@ public:
 
 		// return true, otherwise
 		return true;
+	}
+
+	// check if two linked lists are intersecting
+	bool intersectsWith(SHARED_PTR secondTail) 
+	{
+		// if tail nodes are same
+		if (tail == secondTail)
+			return true;
+		
+		// else
+		return false;
+	}
+
+	// find intersecting node
+	SHARED_PTR intersectsAt(shared_ptr<SinglyLinkedList> secondList)
+	{
+		// check if there is an intersection
+		if (!intersectsWith(secondList->tail))
+			return NULL;
+
+		// heads for two lists, first node is for the longer list, and second one for shorter list
+		SHARED_PTR curr1 = (this->total_length > secondList->total_length) ? this->head : secondList->head;
+		SHARED_PTR curr2 = (this->total_length > secondList->total_length) ? secondList->head : this->head;
+
+		// starting node for longer list
+		int startAt = abs(this->total_length - secondList->total_length);
+
+		// find intersection point
+		int index = 0;
+		while (curr1 != curr2)
+		{
+			// catching up nodes, increment for shorter list only
+			// after traversing the excess length in the longer list
+			if (index >= startAt)
+				curr2 = curr2->next;
+			curr1 = curr1->next;		// increment for longer list
+			index++;
+		}
+		
+		// return intersecting node
+		return curr1;
 	}
 };
 
