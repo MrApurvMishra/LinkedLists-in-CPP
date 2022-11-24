@@ -354,6 +354,39 @@ public:
 		// return intersecting node
 		return curr1;
 	}
+
+	// loop detection, returns node where loop starts or NULL if no loop
+	SHARED_PTR detectLoop()
+	{
+		// using a slow and a fast pointer
+		SHARED_PTR slow = head;
+		SHARED_PTR fast = head;
+
+		// iterate through and check collision
+		while (fast && fast->next)
+		{
+			slow = slow->next;
+			fast = fast->next->next;
+			if (slow == fast)			// collision
+				break;
+		}
+
+		// if fast pointer or the next one is NULL, then no loop detected
+		if (!fast || !fast->next)
+			return nullptr;
+
+		// find the start of loop
+		// move the slow pointer to head node
+		slow = head;
+		while (slow != fast)			// they are both at equal steps from loop start
+		{
+			slow = slow->next;
+			fast = fast->next->next;
+		}
+
+		// return any one of them
+		return slow;
+	}
 };
 
 // construct linked list from user inputs
@@ -398,7 +431,7 @@ int main()
 	cout << "List 2 - " << (list2->isPalindrome() ? "true" : "false") << endl;
 
 	// check if the list is palindrome, using stack
-	cout << endl << "Check if given lists were palindrome... using stack" << endl;
+	cout << endl << "Check if given lists were palindrome... (using stack)" << endl;
 	cout << "List 1 - " << (list1->isPalindrome_usingStack() ? "true" : "false") << endl;
 	cout << "List 2 - " << (list2->isPalindrome_usingStack() ? "true" : "false") << endl;
 
@@ -410,10 +443,25 @@ int main()
 	else
 		cout << "Intersection at value = " << intersectingNode->data << ", at address " << intersectingNode;
 
-	// remove duplicates and print
-	cout << endl << "After removing duplicates: " << endl;
-	list1->removeDups();
-	list2->removeDups();
+	/* check for presence of a loop	*/
+	SHARED_PTR loopStart;
+	cout << endl << "Checking if the lists have a loop..." << endl;
+
+	// list 1
+	cout << "List 1: ";
+	loopStart = list1->detectLoop();
+	if (loopStart == NULL)
+		cout << "No loop exists!" << endl;
+	else
+		cout << "Loop starts at value = " << loopStart->data << ", at address " << loopStart;
+
+	// list 2
+	cout << "List 2: ";
+	loopStart = list2->detectLoop();
+	if (loopStart == NULL)
+		cout << "No loop exists!" << endl;
+	else
+		cout << "Loop starts at value = " << loopStart->data << ", at address " << loopStart;
 
 	// remove head node
 	list1->deleteHead();
@@ -425,6 +473,11 @@ int main()
 	cout << endl << "Removed head from list 1 and tail from list 2: " << endl;
 	list1->printNodes(list1->head);
 	list2->printNodes(list2->head);
+
+	// remove duplicates and print
+	cout << endl << "After removing duplicates: " << endl;
+	list1->removeDups();
+	list2->removeDups();
 
 	// print kth to last element
 	int k;
