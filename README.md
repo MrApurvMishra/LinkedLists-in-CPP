@@ -13,3 +13,5 @@ Implementation of Singly Linked Lists in C++, along with multiple functions to m
 etc.
 
 Based on problems from the book 'Cracking the Coding Interview' by Gayle Laakmann McDowell.
+
+(complete Visual Studio project on the master branch)
